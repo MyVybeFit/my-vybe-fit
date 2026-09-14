@@ -1085,7 +1085,7 @@ async function loadMemberProfile() {
     document.getElementById('avatarText').textContent =
       firstName.charAt(0).toUpperCase();
   }
-}async function initialiseAuth() {
+async function initialiseAuth() {
   const { data, error } =
     await supabaseClient.auth.getSession();
 
@@ -1111,6 +1111,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
   }
 });
 
-initialiseAuth();</script>
+initialiseAuth();
+  </script>
 </body>
 </html>
