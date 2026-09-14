@@ -622,7 +622,7 @@ body {
         <div class="quick-text">Access your gym</div>
       </div>
 
-      <div class="quick">
+      <div class="quick" onclick="show('account')">
         <div class="quick-icon">◎</div>
         <div class="quick-title">My account</div>
         <div class="quick-text">Profile & payments</div>
@@ -870,6 +870,41 @@ body {
 
 </div>
 
+<!-- ACCOUNT -->
+<div id="account" class="screen">
+
+  <div class="back" onclick="show('home')">← Back</div>
+
+  <div class="page-title">My account</div>
+
+  <div class="booking-card">
+    <strong id="accountName">Your name</strong>
+    <p id="accountEmail">your@email.com</p>
+  </div>
+
+  <div class="booking-card">
+    <strong>Membership</strong>
+    <p>My Vybe Fit member</p>
+    <p>Active</p>
+  </div>
+
+  <div class="booking-card">
+    <strong>Payments</strong>
+    <p>Your payment history will appear here.</p>
+  </div>
+
+  <div class="section">
+    <button
+      class="button"
+      style="background:#f1f1f1;"
+      onclick="logout()"
+    >
+      LOG OUT
+    </button>
+  </div>
+
+</div>
+
 
 <!-- NAV -->
 <div class="bottom-nav">
@@ -889,10 +924,10 @@ body {
     Bookings
   </div>
 
-  <div class="nav-item">
-    <div class="nav-icon">●</div>
-    Account
-  </div>
+  <div class="nav-item" onclick="show('account')">
+  <div class="nav-icon">●</div>
+  Account
+</div>
 
 </div>
 
