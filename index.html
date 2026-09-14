@@ -376,7 +376,17 @@ body {
     box-shadow: 0 10px 50px rgba(0,0,0,.08);
   }
 }
-</style>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = 'https://avnklmaqfukzhysauayq.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_nwBXGozCxsYEUuuAiHBeQA_sPGNrvwD';
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+</script>
 </head>
 
 <body>
