@@ -582,11 +582,11 @@ body {
 
   <div class="header">
     <div class="logo">MY VYBE<span>.</span></div>
-    <div class="avatar">G</div>
+    <div class="avatar" id="avatarText">G</div>
   </div>
 
   <div class="hero">
-    <small>GOOD MORNING</small>
+    <small id="greetingText">GOOD MORNING</small>
     <h1>Ready for your next Vybe?</h1>
 
     <div class="next">
@@ -1054,7 +1054,38 @@ function selectSlot(element) {
         authMode === 'signup' ? 'Create account' : 'Log in';
     }
   });
+async function loadMemberProfile() {
+  const {
+    data: { user },
+    error: userError
+  } = await supabaseClient.auth.getUser();
 
+  if (userError || !user) {
+    console.error('Could not get member:', userError);
+    return;
+  }
+
+  const { data: profile, error: profileError } = await supabaseClient
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError) {
+    console.error('Could not load profile:', profileError);
+    return;
+  }
+
+  if (profile && profile.full_name) {
+    const firstName = profile.full_name.trim().split(/\s+/)[0];
+
+    document.getElementById('greetingText').textContent =
+      `GOOD MORNING, ${firstName.toUpperCase()}`;
+
+    document.getElementById('avatarText').textContent =
+      firstName.charAt(0).toUpperCase();
+  }
+}
   async function initialiseAuth() {
     const { data, error } =
       await supabaseClient.auth.getSession();
@@ -1064,16 +1095,20 @@ function selectSlot(element) {
       return;
     }
 
-    if (data.session) {
-      authOverlay.style.display = 'none';
+   if (data.session) {
+  authOverlay.style.display = 'none';
+  await loadMemberProfile();
+}
     } else {
       authOverlay.style.display = 'flex';
     }
   }
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (session) {
-      authOverlay.style.display = 'none';
+  if (session) {
+  authOverlay.style.display = 'none';
+  loadMemberProfile();
+}
     } else {
       authOverlay.style.display = 'flex';
     }
