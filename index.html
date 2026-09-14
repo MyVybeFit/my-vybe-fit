@@ -386,11 +386,195 @@ body {
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
   );
-</script>
+</script><style>
+  .auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #f4f4f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: 390px;
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 32px 24px;
+    box-shadow: 0 10px 50px rgba(0,0,0,.12);
+  }
+
+  .auth-logo {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    margin-bottom: 8px;
+  }
+
+  .auth-logo span {
+    color: #b7ff00;
+  }
+
+  .auth-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 25px 0 8px;
+  }
+
+  .auth-subtitle {
+    color: #666;
+    font-size: 15px;
+    margin-bottom: 25px;
+  }
+
+  .auth-field {
+    margin-bottom: 14px;
+  }
+
+  .auth-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 7px;
+  }
+
+  .auth-field input {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    font-size: 16px;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .auth-field input:focus {
+    border-color: #111;
+  }
+
+  .auth-button {
+    width: 100%;
+    border: 0;
+    border-radius: 15px;
+    padding: 16px;
+    background: #b7ff00;
+    color: #111;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  .auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .auth-switch button {
+    border: 0;
+    background: none;
+    font-weight: 800;
+    cursor: pointer;
+    color: #111;
+    padding: 0;
+  }
+
+  .auth-message {
+    display: none;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f0f0ed;
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+
+  .auth-message.error {
+    background: #ffe8e8;
+    color: #9b1c1c;
+  }
+
+  .auth-message.success {
+    background: #edffd0;
+    color: #315000;
+  }
+
+  .auth-loading {
+    opacity: .6;
+    pointer-events: none;
+  }
+</style>
 </head>
 
 <body>
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-card">
 
+    <div class="auth-logo">MY VYBE<span>.</span></div>
+
+    <div class="auth-title" id="authTitle">Welcome back</div>
+
+    <div class="auth-subtitle" id="authSubtitle">
+      Log in to manage your My Vybe Fit sessions.
+    </div>
+
+    <div id="authMessage" class="auth-message"></div>
+
+    <form id="authForm">
+
+      <div class="auth-field" id="nameField" style="display:none;">
+        <label for="authName">Full name</label>
+        <input
+          type="text"
+          id="authName"
+          autocomplete="name"
+          placeholder="Your name"
+        >
+      </div>
+
+      <div class="auth-field">
+        <label for="authEmail">Email address</label>
+        <input
+          type="email"
+          id="authEmail"
+          autocomplete="email"
+          placeholder="you@example.com"
+          required
+        >
+      </div>
+
+      <div class="auth-field">
+        <label for="authPassword">Password</label>
+        <input
+          type="password"
+          id="authPassword"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          minlength="6"
+          required
+        >
+      </div>
+
+      <button type="submit" class="auth-button" id="authSubmit">
+        Log in
+      </button>
+
+    </form>
+
+    <div class="auth-switch">
+      <span id="authSwitchText">Don't have an account?</span>
+      <button type="button" id="authSwitchButton">
+        Sign up
+      </button>
+    </div>
+
+  </div>
+</div>
 <div class="app">
 
 <!-- HOME -->
@@ -738,6 +922,164 @@ function selectSlot(element) {
 }
 
 </script>
+<script>
+  let authMode = 'login';
 
+  const authOverlay = document.getElementById('authOverlay');
+  const authForm = document.getElementById('authForm');
+  const authTitle = document.getElementById('authTitle');
+  const authSubtitle = document.getElementById('authSubtitle');
+  const authSubmit = document.getElementById('authSubmit');
+  const authSwitchText = document.getElementById('authSwitchText');
+  const authSwitchButton = document.getElementById('authSwitchButton');
+  const authMessage = document.getElementById('authMessage');
+  const nameField = document.getElementById('nameField');
+  const authName = document.getElementById('authName');
+  const authEmail = document.getElementById('authEmail');
+  const authPassword = document.getElementById('authPassword');
+
+  function showAuthMessage(message, type = '') {
+    authMessage.textContent = message;
+    authMessage.className = 'auth-message';
+
+    if (type) {
+      authMessage.classList.add(type);
+    }
+
+    authMessage.style.display = 'block';
+  }
+
+  function clearAuthMessage() {
+    authMessage.textContent = '';
+    authMessage.className = 'auth-message';
+    authMessage.style.display = 'none';
+  }
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    clearAuthMessage();
+
+    if (mode === 'signup') {
+      authTitle.textContent = 'Create your account';
+      authSubtitle.textContent =
+        'Join My Vybe Fit and start booking private sessions.';
+      authSubmit.textContent = 'Create account';
+      authSwitchText.textContent = 'Already have an account?';
+      authSwitchButton.textContent = 'Log in';
+      nameField.style.display = 'block';
+      authName.required = true;
+      authPassword.autocomplete = 'new-password';
+    } else {
+      authTitle.textContent = 'Welcome back';
+      authSubtitle.textContent =
+        'Log in to manage your My Vybe Fit sessions.';
+      authSubmit.textContent = 'Log in';
+      authSwitchText.textContent = "Don't have an account?";
+      authSwitchButton.textContent = 'Sign up';
+      nameField.style.display = 'none';
+      authName.required = false;
+      authPassword.autocomplete = 'current-password';
+    }
+  }
+
+  authSwitchButton.addEventListener('click', () => {
+    setAuthMode(authMode === 'login' ? 'signup' : 'login');
+  });
+
+  authForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearAuthMessage();
+
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+    const fullName = authName.value.trim();
+
+    authForm.classList.add('auth-loading');
+    authSubmit.textContent =
+      authMode === 'signup' ? 'Creating account...' : 'Logging in...';
+
+    try {
+      if (authMode === 'signup') {
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        if (data.session) {
+          showAuthMessage(
+            'Account created. Welcome to My Vybe Fit!',
+            'success'
+          );
+        } else {
+          showAuthMessage(
+            'Account created. Check your email to confirm your account, then log in.',
+            'success'
+          );
+
+          authForm.reset();
+        }
+
+      } else {
+        const { error } =
+          await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+          });
+
+        if (error) throw error;
+      }
+
+    } catch (error) {
+      console.error(error);
+
+      let message = error.message || 'Something went wrong.';
+
+      if (message.toLowerCase().includes('invalid login')) {
+        message = 'Email or password is incorrect.';
+      }
+
+      showAuthMessage(message, 'error');
+
+    } finally {
+      authForm.classList.remove('auth-loading');
+
+      authSubmit.textContent =
+        authMode === 'signup' ? 'Create account' : 'Log in';
+    }
+  });
+
+  async function initialiseAuth() {
+    const { data, error } =
+      await supabaseClient.auth.getSession();
+
+    if (error) {
+      console.error('Auth error:', error);
+      return;
+    }
+
+    if (data.session) {
+      authOverlay.style.display = 'none';
+    } else {
+      authOverlay.style.display = 'flex';
+    }
+  }
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      authOverlay.style.display = 'none';
+    } else {
+      authOverlay.style.display = 'flex';
+    }
+  });
+
+  initialiseAuth();
+</script>
 </body>
 </html>
