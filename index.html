@@ -1085,35 +1085,32 @@ async function loadMemberProfile() {
     document.getElementById('avatarText').textContent =
       firstName.charAt(0).toUpperCase();
   }
-}
-  async function initialiseAuth() {
-    const { data, error } =
-      await supabaseClient.auth.getSession();
+}async function initialiseAuth() {
+  const { data, error } =
+    await supabaseClient.auth.getSession();
 
-    if (error) {
-      console.error('Auth error:', error);
-      return;
-    }
-
-   if (data.session) {
-     authOverlay.style.display = 'none';
-     await loadMemberProfile();
-   } else {
-     authOverlay.style.display = 'flex';
-   }
+  if (error) {
+    console.error('Auth error:', error);
+    return;
   }
 
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (session) {
-  authOverlay.style.display = 'none';
-  loadMemberProfile();
+  if (data.session) {
+    authOverlay.style.display = 'none';
+    await loadMemberProfile();
+  } else {
+    authOverlay.style.display = 'flex';
+  }
 }
-    } else {
-      authOverlay.style.display = 'flex';
-    }
-  });
 
-  initialiseAuth();
-</script>
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    authOverlay.style.display = 'none';
+    loadMemberProfile();
+  } else {
+    authOverlay.style.display = 'flex';
+  }
+});
+
+initialiseAuth();</script>
 </body>
 </html>
