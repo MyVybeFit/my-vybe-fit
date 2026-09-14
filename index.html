@@ -1096,12 +1096,11 @@ async function loadMemberProfile() {
     }
 
    if (data.session) {
-  authOverlay.style.display = 'none';
-  await loadMemberProfile();
-}
-    } else {
-      authOverlay.style.display = 'flex';
-    }
+     authOverlay.style.display = 'none';
+     await loadMemberProfile();
+   } else {
+     authOverlay.style.display = 'flex';
+   }
   }
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
